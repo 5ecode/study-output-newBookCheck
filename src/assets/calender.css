@@ -1,0 +1,101 @@
+.fc .fc-toolbar.fc-header-toolbar{
+  margin-bottom: 0;
+}
+.fc .fc-multimonth{
+  border: none;
+}
+.fc .fc-multimonth-title{
+  padding-block: 4px;
+  background: #a16a00;
+  color: #fff;
+}
+
+.fc .fc-daygrid-day-number {
+  line-height: 1;
+}
+
+.fc .fc-day-sun,
+.fc-day-sun .fc-daygrid-day-number {
+  color: #7a1400;
+}
+
+.fc .fc-day-sat,
+.fc-day-sat .fc-daygrid-day-number {
+  color: #00297a;
+}
+
+.fc .fc-daygrid-day.fc-day-today{
+  background: initial;
+}
+
+.fc-day-today .fc-daygrid-day-top{
+  position: relative;
+}
+
+.fc-day-today .fc-daygrid-day-top::before {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 9999px;
+  background-color: #b3e2ff;
+  content: "";
+}
+
+.fc .fc-daygrid-day-top{
+  justify-content: center;
+}
+
+.fc-theme-standard th{
+  border-width: 0;
+  font-size: calc((12 / 16) * 1rem);
+}
+
+.fc-theme-standard td,
+.fc-daygrid-body {
+  border-width: 1px 0 0;
+  border-color: #ddd;
+  padding-block: 2px 4px;
+}
+
+.fc .fc-cell-shaded, .fc .fc-day-disabled{
+  background: #fff;
+}
+
+.fc .fc-daygrid-event{
+  cursor: pointer;
+}
+
+.fc-popover{
+  width: calc(100% - 20px);
+  max-width: 500px;
+}
+
+.fc .no-click::before,
+.fc .no-click::after{
+  display: none;
+}
+
+.fc .fc-event:not(.no-click):hover .fc-event-title,
+.fc .fc-event:not(.no-click):focus-visible .fc-event-title{
+  color: #a16a00;
+}
+
+.fc .no-click.fc-event-selected,
+.fc .no-click.fc-event:focus{
+  box-shadow: none;
+}
+
+.fc-event-selected::after, .fc-event:focus::after,
+.fc-event-selected::before, .fc-event:focus::before{
+  content: none;
+}
+
+.fc .no-click .fc-event-title {
+  text-decoration: line-through;
+  opacity: .6;
+  cursor: default;
+}
