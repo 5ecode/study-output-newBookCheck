@@ -136,25 +136,14 @@ const {
   closeDetail,
 } = useModal();
 
-
-// リセット
-// function reset() {
-//   localStorage.removeItem('new-books'); // 保存データ削除
-//   localStorage.removeItem(storageKey);  // 最終更新日もリセット
-//   localStorage.removeItem('stateful-books');
-//   localStorage.removeItem('bookShelf');
-//   localStorage.removeItem('wishlist');
-//   location.reload();
-// }
-
 </script>
 
 <template>
   <div class="px-[15px]">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 sm:relative">
       <h2 class="text-xl font-medium">新刊情報</h2>
 
-      <div class="flex justify-center items-center fixed sm:static top-[54px] right-[15px] z-10 text-[#a16a00]">
+      <div class="flex justify-center items-center fixed sm:absolute top-[54px] sm:top-[50%] right-[15px] sm:transform sm:-translate-y-1/2 z-10 text-[#a16a00]">
         <button @click="viewType = 'index'" :aria-pressed="viewType === 'index'" :class="[baseStyle, 'rounded-l', viewType === 'index'? activeStyle : hoverStyle]" aria-label="一覧"><ListCheck :size="26" /></button>
         <button @click="viewType = 'calendar'" :aria-pressed="viewType === 'calendar'" :class="[baseStyle, 'rounded-r', viewType === 'calendar'? activeStyle : hoverStyle]" aria-label="カレンダー"><CalendarCheck :size="26" /></button>
       </div>
@@ -185,5 +174,4 @@ const {
     <button @click="changeState(detailTargetBook!, null)" class="cursor-pointer hover:underline">リセット</button>
   </DetaileModal>
 
-  <!-- <button @click="reset">リストを削除</button> -->
 </template>

@@ -245,7 +245,7 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
     </template>
 
     <transition name="fade" appear>
-      <div v-if="showMsg" @:click="showMsg = !showMsg" class="fixed inset-x-0 bottom-0 w-full bg-blue-500 text-white text-center">変更を保存しました<span class="fixed right-0 bottom-0.5"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div v-if="showMsg" @:click="showMsg = !showMsg" class="fixed inset-x-0 bottom-[50%] sm:bottom-0 w-full bg-[#008b8b]/70 text-white text-center">変更を保存しました<span class="fixed right-0 bottom-[50%] sm:bottom-[1px]"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></span></div>
     </transition>
   </div>
