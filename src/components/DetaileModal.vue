@@ -38,6 +38,7 @@ watch(() => props.isShow, (val) => {
 
 /* function
 ---------------------------------- */
+// モーダル内でフォーカスをループ
 function trapFocus(event: KeyboardEvent) {
   if (event.key !== 'Tab') return;
 
@@ -56,7 +57,7 @@ function trapFocus(event: KeyboardEvent) {
   }
 }
 
-
+// モーダル内のフォーカス対象取得
 function getFocusableElements(container: HTMLElement | null): HTMLElement[] {
   if (!container) return [];
   return Array.from(
@@ -69,7 +70,7 @@ function getFocusableElements(container: HTMLElement | null): HTMLElement[] {
 
 <template>
   <transition name="fade">
-    <div v-if="isShow" @click.self="$emit('modal-closed')" @keydown="trapFocus" class="fixed inset-0 z-50 flex items-center justify-center bg-sky-500/50">
+    <div v-if="isShow" @click.self="$emit('modal-closed')" @keydown="trapFocus" class="fixed inset-0 z-50 flex items-center justify-center bg-[#008b8b]/50">
       <div ref="modalRef" class="relative bg-white p-6 rounded shadow-md w-full max-w-md mx-4">
         <div class="flex flex-col-reverse items-center gap-5 mb-5">
           <div class="w-full">

@@ -66,7 +66,7 @@ const {
 <template>
   <div class="px-[15px]">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-medium">本棚</h2>
+      <h2 class="text-xl font-medium">本棚リスト</h2>
     </div>
 
     <template v-if="useBookShelf.books && useBookShelf.books.length > 0">

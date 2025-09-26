@@ -95,7 +95,7 @@ const {
 <template>
   <div class="px-[15px]">
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-medium">保留中</h2>
+      <h2 class="text-xl font-medium">保留リスト</h2>
     </div>
     <template v-if="useWishlist.books && useWishlist.books.length > 0">
       <BookList :books="useWishlist.books" @modal-opened="openDetail" />
