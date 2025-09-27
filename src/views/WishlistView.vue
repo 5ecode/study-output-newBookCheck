@@ -110,7 +110,7 @@ const {
 
     <StateButton v-if="isAfterToday(detailTargetBook!.date)" @clicked="updateBookState(detailTargetBook!.id, 'ordered')">予約済</StateButton>
 
-    <StateButton v-if="isAfterToday(detailTargetBook!.date)" @clicked="changeStateBought(detailTargetBook!)">購入済</StateButton>
+    <StateButton @clicked="changeStateBought(detailTargetBook!)">購入済</StateButton>
 
     <DeleteButton @click="deleteConfirm(detailTargetBook!.id)" class="ml-auto" />
   </DetaileModal>
