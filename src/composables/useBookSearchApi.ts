@@ -1,6 +1,7 @@
 // src/composables/useBookSearchApi.ts
 import axios from 'axios';
 import { useNewBooksStore } from '../stores/NewBooksStore';
+import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
 import type { KeywordSet, BookData } from '../types/common';
 
 interface RakutenApiItem {
@@ -10,12 +11,13 @@ interface RakutenApiItem {
   itemUrl: string
   isbn: string
   salesDate: string
+  size: string
 }
 
 const APP_ID = import.meta.env.VITE_RAKUTEN_APP_ID;
 
 // 新刊情報を取得
-export async function useBookSearchApi(keywordSet: KeywordSet[]) {
+export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful = false) {
   const useNewBooks = useNewBooksStore();
 
   for (const item of keywordSet) {
@@ -31,6 +33,7 @@ export async function useBookSearchApi(keywordSet: KeywordSet[]) {
         salesDate: item.Item.salesDate,
         itemUrl: item.Item.itemUrl,
         isbn: item.Item.isbn,
+        size: mapSize(item.Item.size),
       }));
 
       // 補足データを追加
@@ -43,6 +46,10 @@ export async function useBookSearchApi(keywordSet: KeywordSet[]) {
       }
 
       useNewBooks.addNewBooks(enrichedResults);
+
+      if (updateStateful) {
+        updateStatefulBooks(true);
+      }
 
       // 1秒に1回リクエスト
       await delay(1000);
@@ -68,6 +75,18 @@ function buildQueryParams(item: KeywordSet): URLSearchParams {
   return params;
 }
 
+// 書籍サイズ変換
+function mapSize(sizeStr: string): 0 | 1 | 2 | 3 | 9 {
+  switch (sizeStr) {
+  case '単行本': return 1;
+  case '文庫': return 2;
+  case 'コミック': return 9;
+  case '新書': return 3;
+  default: return 0;
+  }
+}
+
+// 新刊定義の書籍のみ追加
 function addRegularDate(book: BookData) {
   if (book.salesDate) {
     const data = formatSalesDate(book.salesDate);
@@ -106,3 +125,4 @@ function delay(ms: number) {
     }, ms);
   });
 }
+

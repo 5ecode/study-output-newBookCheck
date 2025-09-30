@@ -9,6 +9,7 @@ import { useWishlistStore } from '../stores/WishlistStore';
 import { ListCheck, CalendarCheck } from 'lucide-vue-next';
 import { useBookSearchApi } from '../composables/useBookSearchApi';
 import { useModal } from '../composables/useModal';
+import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
 import { isAlreadyAdded } from '../utils/isAlreadyAdded';
 import { isAfterToday } from '../utils/isAfterToday';
 import { formatDate } from '../utils/formatDate';
@@ -47,63 +48,34 @@ const booksForDisplay = computed<BookWithId[]>(() =>
 onMounted(() => {
   useNewBooks.loadFromStorage();
   useStatefull.loadFromStorage();
+  useBookShelf.loadFromStorage();
+  useWishlist.loadFromStorage();
   useEntry.loadFromStorage();
   updateNewBooks();
 });
 
 /* function
 ---------------------------------- */
-// 新刊情報を取得してマージ
-function updateStatefulBooks() {
-  const newBooks = useNewBooks.books;
-  const statefulBooks = useStatefull.books;
-
-  // マージ処理
-  const merged = newBooks.map(book => {
-    const existing = statefulBooks.find(b => b.isbn === book.isbn);
-    return existing
-      ? { ...book, state: existing.state }
-      : { ...book, state: null };
-  });
-
-  // 予約済の書籍は発売日を過ぎたら購入済に変更
-  const today = new Date();
-  for (const book of merged) {
-    if (book.state === 'ordered' && new Date(book.date) <= today) {
-      book.state = 'bought';
-      // 本棚に追加
-      if (!isAlreadyAdded(book, useBookShelf.books)) {
-        useBookShelf.books.push({ ...book });
-        useBookShelf.saveToStorage();
-      }
-    }
-  }
-
-  // 発売日が新しい順にソート
-  const sortedDates = merged.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
-
-  // ストレージへ保存
-  useStatefull.books = sortedDates;
-  useStatefull.saveToStorage();
-}
-
 // 日に一度だけ最新情報取得
 async function updateNewBooks() {
   const today = formatDate(new Date());
   const lastFetchDate = localStorage.getItem(storageKey);
 
   if (lastFetchDate !== today) {
-    useNewBooks.books = [];
+    // 新刊定義から外れた書籍を削除
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    useNewBooks.books = useNewBooks.books.filter(book => new Date(book.date) >= threeMonthsAgo);
     useNewBooks.saveToStorage();
-    await useBookSearchApi(useEntry.keywordList);
+
+    // 最新の新刊情報取得
+    await useBookSearchApi(useEntry.keywordList, true);
+
+    // 最新更新日を記録
+    localStorage.setItem(storageKey, today);
+  } else {
+    updateStatefulBooks(false);
   }
-
-  updateStatefulBooks();
-
-  // 最新更新日を記録
-  localStorage.setItem(storageKey, today);
 }
 
 // 状態を変更
@@ -117,9 +89,13 @@ function changeState(book: BookWithId, state: State) {
   if (state === 'bought' && !isAlreadyAdded(book, useBookShelf.books)) {
     useBookShelf.books.push({ ...book });
     useBookShelf.saveToStorage();
+
+    // 保留中からは削除
+    useWishlist.books = useWishlist.books.filter(b => b.isbn !== book.isbn);
+    useWishlist.saveToStorage();
   }
 
-  // 保留に保存
+  // 保留中に保存
   if (state === 'pending' && !isAlreadyAdded(book, useWishlist.books)) {
     useWishlist.books.push({ ...book });
     useWishlist.saveToStorage();
@@ -135,7 +111,6 @@ const {
   openDetail,
   closeDetail,
 } = useModal();
-
 </script>
 
 <template>
@@ -162,7 +137,6 @@ const {
     <EmptyState msg="未購入の新刊情報はありません" />
   </template>
 
-
   <!-- モーダル -->
   <DetaileModal :is-show="isShow" :book="detailTargetBook" @modal-closed="closeDetail">
     <StateButton v-if="isAfterToday(detailTargetBook!.date)" :is-active="detailTargetBook?.state === 'ordered'" @clicked="changeState(detailTargetBook!, 'ordered')">予約済</StateButton>
@@ -173,5 +147,4 @@ const {
 
     <button @click="changeState(detailTargetBook!, null)" class="cursor-pointer hover:underline">リセット</button>
   </DetaileModal>
-
 </template>

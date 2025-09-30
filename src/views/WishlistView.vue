@@ -27,22 +27,10 @@ onMounted(() => {
   useStatefull.loadFromStorage();
   useBookShelf.loadFromStorage();
   useWishlist.loadFromStorage();
-  updateWishlist();
 });
 
 /* function
 ---------------------------------- */
-function updateWishlist() {
-  const newBooks = useStatefull.books;
-  const wishlistBooks = newBooks.filter(function (item) {
-    return item.state === 'pending';
-  });
-
-  // ストレージへ保存
-  useWishlist.books = wishlistBooks;
-  useWishlist.saveToStorage();
-}
-
 // 書籍を本棚に移動
 function changeStateBought(book: BookWithId) {
   if (!isAlreadyAdded(book, useBookShelf.books)) {

@@ -19,6 +19,7 @@ export type BookData = {
   date: string;
   isbn: string;
   state: State;
+  size: 0 | 2 | 9 | 3 | 1
 };
 
 export interface BookWithId extends BookData {

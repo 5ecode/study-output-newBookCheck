@@ -60,6 +60,7 @@ const nextId = computed((): number => {
 // ストレージのキーワードセットを読み込む
 onMounted(() => {
   useEntry.loadFromStorage();
+  useNewBooks.loadFromStorage();
 });
 
 /* function
@@ -72,7 +73,12 @@ function keywordRegister() {
   }
   errors.entry = '';
 
-  const keyword = { id: nextId.value, title: title.value ?? null, author: author.value ?? null, size: size.value };
+  const keyword = {
+    id: nextId.value,
+    title: title.value ?? null,
+    author: author.value ?? null,
+    size: size.value,
+  };
   useEntry.keywordList.push(keyword);
   useEntry.saveToStorage();
 
@@ -83,21 +89,24 @@ function keywordRegister() {
   size.value = 0;
 }
 
-// リスト削除
-function deleteKeyword(targetId: number) {
+// キーワード削除
+function deleteKeywordSet(targetId: number) {
   const result = confirm('本当に削除してもよろしいですか？');
+
   if (result) {
+    // 削除するキーワードで新刊情報から書籍を削除
+    const index = useEntry.keywordList.findIndex(item => item.id === targetId);
+    const targetKeyword = useEntry.keywordList[index];
+    removedFromNewBooks(targetKeyword);
+
+    // キーワードセットを削除
     useEntry.keywordList = useEntry.keywordList.filter(item => item.id !== targetId);
     useEntry.saveToStorage();
-
-    useNewBooks.books = [];
-    useNewBooks.saveToStorage();
-    newBookSearch(useEntry.keywordList);
   }
 }
 
-// リスト編集
-function edit(targetItem: { id: number,
+// キーワード編集
+function editKeywordSet(targetItem: { id: number,
   title: string | null,
   author: string | null,
   size: number}) {
@@ -115,7 +124,7 @@ function edit(targetItem: { id: number,
 }
 
 // 編集保存
-function save(targetId: number) {
+function saveKeywordSet(targetId: number) {
   if (!editTitle.value && !editAuthor.value) {
     errors.edit = '書籍名、著者名どちらかを入力してください';
     return;
@@ -123,19 +132,20 @@ function save(targetId: number) {
   errors.edit = '';
 
   const index = useEntry.keywordList.findIndex(item => item.id === targetId);
-  if (index === -1) return;
-
-  const original = useEntry.keywordList[index];
+  const originalKeyword = useEntry.keywordList[index];
   if (
-    original.title === editTitle.value &&
-    original.author === editAuthor.value &&
-    original.size === editSize.value
+    originalKeyword.title === editTitle.value &&
+    originalKeyword.author === editAuthor.value &&
+    originalKeyword.size === editSize.value
   ) {
     editingId.value = null;
     return;
   };
 
-  // 変更があったら保存
+  // 変更前のキーワードで新刊情報から書籍を削除
+  removedFromNewBooks(originalKeyword);
+
+  // 変更を保存
   useEntry.keywordList[index] = {
     ...useEntry.keywordList[index],
     ...{
@@ -145,13 +155,13 @@ function save(targetId: number) {
       author: editAuthor.value,
     },
   };
+
   useEntry.saveToStorage();
   editingId.value = null;
   showMsg.value = true;
 
-  useNewBooks.books = [];
-  useNewBooks.saveToStorage();
-  newBookSearch(useEntry.keywordList);
+  // 変更したキーワードで検索
+  newBookSearch([useEntry.keywordList[index]]);
 }
 
 // 編集キャンセル
@@ -160,6 +170,18 @@ function cancel() {
   editSize.value = 0;
   editTitle.value = '';
   editAuthor.value = '';
+}
+
+// 新刊情報から削除
+function removedFromNewBooks(keyword: KeywordSet) {
+  useNewBooks.books = useNewBooks.books.filter(book => {
+    const titleMatch = keyword.title ? book.title?.includes(keyword.title) : false;
+    const authorMatch = keyword.author ? book.author?.includes(keyword.author) : false;
+    const sizeMatch = book.size === keyword.size;
+
+    return !( (titleMatch || authorMatch) && sizeMatch );
+  });
+  useNewBooks.saveToStorage();
 }
 
 // 新刊チェック
@@ -232,12 +254,12 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
 
           <div class="flex flex-row-reverse sm:flex-col sm:justify-center sm:items-center gap-4">
             <template v-if="editingId === item.id">
-              <button @click="save(item.id)" class="w-[100px] p-1 border border-[#a16a00] rounded bg-[#a16a00] hover:bg-[#8c5d00] text-white transition cursor-pointer">保存</button>
+              <button @click="saveKeywordSet(item.id)" class="w-[100px] p-1 border border-[#a16a00] rounded bg-[#a16a00] hover:bg-[#8c5d00] text-white transition cursor-pointer">保存</button>
               <button @click="cancel" class="hover:underline cursor-pointer">キャンセル</button>
             </template>
             <template v-else>
-              <button @:click="edit(item)" class="w-[100px] p-1 border border-[#a16a00] hover:bg-[#fff2e0] rounded text-[#a16a00] transition cursor-pointer">編集</button>
-              <DeleteButton :color="'#ff907a'" @:click="deleteKeyword(item.id)" />
+              <button @:click="editKeywordSet(item)" class="w-[100px] p-1 border border-[#a16a00] hover:bg-[#fff2e0] rounded text-[#a16a00] transition cursor-pointer">編集</button>
+              <DeleteButton :color="'#ff907a'" @:click="deleteKeywordSet(item.id)" />
             </template>
           </div>
         </li>

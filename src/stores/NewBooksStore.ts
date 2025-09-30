@@ -33,6 +33,7 @@ export const useNewBooksStore = defineStore('new', () => {
           date: book.date,
           isbn: book.isbn,
           state: null,
+          size: book.size,
         });
         saveToStorage();
       }
