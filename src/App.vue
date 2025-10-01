@@ -32,7 +32,7 @@ const isEntry = computed(() => route.name === 'Entry');
       <h1 class="text-lg text-white font-bold">NewBookCheck</h1>
 
       <nav aria-label="メインナビゲーション" class="flex inset-x-0 bottom-0 fixed sm:static sm:grow sm:gap-1 bg-[#a16a00] text-[10px]">
-        <RouterLink to="/" :class="[baseStyle, isHome? activeStyle : hoverStyle]" class="" :aria-current="isHome ? 'page' : undefined"><BookCheck :size="28" />新刊情報</RouterLink>
+        <RouterLink to="/" :class="[baseStyle, isHome? activeStyle : hoverStyle]" :aria-current="isHome ? 'page' : undefined"><BookCheck :size="28" />新刊情報</RouterLink>
         <RouterLink to="/book-Shelf" :class="[baseStyle, isBookShelf? activeStyle : hoverStyle]" :aria-current="isBookShelf ? 'page' : undefined"><Library :size="28" />本棚</RouterLink>
         <RouterLink to="/wishlist" :class="[baseStyle, isWishlist? activeStyle : hoverStyle]" :aria-current="isWishlist ? 'page' : undefined"><CircleStar :size="28" />保留</RouterLink>
         <RouterLink to="/entry" :class="[baseStyle, isEntry? activeStyle : hoverStyle]" :aria-current="isEntry ? 'page' : undefined"><SquarePen :size="26" />キーワード登録</RouterLink>
