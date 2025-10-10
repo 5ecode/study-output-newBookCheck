@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import multiMonthPlugin from '@fullcalendar/multimonth';
 import { formatDate } from '../utils/formatDate';
+import { parseLocalDate } from '../utils/parseLocalDate';
 import type { State, BookWithId } from '../types/common';
 import '../assets/calender.css';
 
@@ -80,7 +81,7 @@ const calendarOptions = computed(() => ({
 const validRange = computed(() => {
   if (props.books.length === 0) return undefined;
 
-  const dates = props.books.map(book => new Date(book.date));
+  const dates = props.books.map(book => parseLocalDate(book.date));
   const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
   const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
 

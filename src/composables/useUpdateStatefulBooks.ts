@@ -3,6 +3,8 @@
 import { useBookShelfStore } from '../stores/BookShelfStore';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { useStatefullBooksStore } from '../stores/StatefulBooksStore';
+import { formatDate } from '../utils/formatDate';
+import { parseLocalDate } from '../utils/parseLocalDate';
 import type { BookWithId } from '../types/common';
 
 
@@ -23,15 +25,15 @@ export function updateStatefulBooks(runDateBasedUpdates: boolean) {
   });
 
   if (runDateBasedUpdates) {
-    const today = new Date();
-    const threeMonthsAgo = new Date(today);
+    const today = parseLocalDate(formatDate(new Date()));
+    const threeMonthsAgo = parseLocalDate(formatDate(new Date()));
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
     const filtered: BookWithId[] = [];
 
     for (const book of merged) {
     // 予約済 → 発売日を過ぎたら購入済
-      if (book.state === 'ordered' && new Date(book.date) <= today) {
+      if (book.state === 'ordered' && parseLocalDate(book.date) <= today) {
         book.state = 'bought';
 
         if (!useBookShelf.books.some(b => b.isbn === book.isbn)) {
@@ -40,7 +42,7 @@ export function updateStatefulBooks(runDateBasedUpdates: boolean) {
       }
 
       // 発売から3か月以内の本だけ残す
-      if (new Date(book.date) > threeMonthsAgo) {
+      if (parseLocalDate(book.date) > threeMonthsAgo) {
         filtered.push(book);
       }
     }

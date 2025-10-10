@@ -10,9 +10,10 @@ import { ListCheck, CalendarCheck } from 'lucide-vue-next';
 import { useBookSearchApi } from '../composables/useBookSearchApi';
 import { useModal } from '../composables/useModal';
 import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
-import { isAlreadyAdded } from '../utils/isAlreadyAdded';
-import { isAfterToday } from '../utils/isAfterToday';
 import { formatDate } from '../utils/formatDate';
+import { isAfterToday } from '../utils/isAfterToday';
+import { isAlreadyAdded } from '../utils/isAlreadyAdded';
+import { parseLocalDate } from '../utils/parseLocalDate';
 import BookList from '../components/BookList.vue';
 import Calendar from '../components/Calendar.vue';
 import DetaileModal from '../components/DetaileModal.vue';
@@ -63,9 +64,9 @@ async function updateNewBooks() {
 
   if (lastFetchDate !== today) {
     // 新刊定義から外れた書籍を削除
-    const threeMonthsAgo = new Date();
+    const threeMonthsAgo = parseLocalDate(formatDate(new Date()));
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    useNewBooks.books = useNewBooks.books.filter(book => new Date(book.date) >= threeMonthsAgo);
+    useNewBooks.books = useNewBooks.books.filter(book => parseLocalDate(book.date) >= threeMonthsAgo);
     useNewBooks.saveToStorage();
 
     // 最新の新刊情報取得

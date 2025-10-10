@@ -2,6 +2,8 @@
 import axios from 'axios';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
+import { formatDate } from '../utils/formatDate';
+import { parseLocalDate } from '../utils/parseLocalDate';
 import type { KeywordSet, BookData } from '../types/common';
 
 interface RakutenApiItem {
@@ -90,11 +92,11 @@ function mapSize(sizeStr: string): 0 | 1 | 2 | 3 | 9 {
 function addRegularDate(book: BookData) {
   if (book.salesDate) {
     const data = formatSalesDate(book.salesDate);
-    const bookDate = new Date(data);
-    const now = new Date();
-    const twoMonthsAgo = new Date();
-    twoMonthsAgo.setMonth(now.getMonth() - 3);
-    if (bookDate >= twoMonthsAgo) {
+    const bookDate = parseLocalDate(data);
+    const threeMonthsAgo = parseLocalDate(formatDate(new Date()));
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    if (bookDate >= threeMonthsAgo) {
       return { ...book,  date: data };
     }
   }
