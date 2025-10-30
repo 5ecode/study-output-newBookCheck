@@ -38,9 +38,17 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
         size: mapSize(item.Item.size),
       }));
 
+      // キーワードが含まれた書籍かを確認
+      const checkBooks = newBooks.filter(book => {
+        const titleMatch = item.title ? book.title?.includes(item.title) : false;
+        const authorMatch = item.author ? book.author?.includes(item.author) : false;
+
+        return ( (titleMatch || authorMatch));
+      });
+
       // 補足データを追加
       const enrichedResults: BookData[] = [];
-      for (const book of newBooks) {
+      for (const book of checkBooks) {
         const enriched = addRegularDate(book);
         if (enriched) {
           enrichedResults.push(enriched);

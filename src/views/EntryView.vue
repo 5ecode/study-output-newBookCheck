@@ -177,10 +177,11 @@ function removedFromNewBooks(keyword: KeywordSet) {
   useNewBooks.books = useNewBooks.books.filter(book => {
     const titleMatch = keyword.title ? book.title?.includes(keyword.title) : false;
     const authorMatch = keyword.author ? book.author?.includes(keyword.author) : false;
-    const sizeMatch = book.size === keyword.size;
+    const sizeMatch = (book.size === keyword.size || keyword.size === 0);
 
-    return !( (titleMatch || authorMatch) && sizeMatch );
+    return !((titleMatch || authorMatch) && sizeMatch);
   });
+
   useNewBooks.saveToStorage();
 }
 
