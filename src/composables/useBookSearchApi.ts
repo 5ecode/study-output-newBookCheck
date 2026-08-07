@@ -17,6 +17,7 @@ interface RakutenApiItem {
 }
 
 const APP_ID = import.meta.env.VITE_RAKUTEN_APP_ID;
+const ACCESS_KEY = import.meta.env.VITE_RAKUTEN_ACCESS_KEY;
 
 // 新刊情報を取得
 export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful = false) {
@@ -24,7 +25,7 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
 
   for (const item of keywordSet) {
     try {
-      const baseUrl = 'https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404';
+      const baseUrl = 'https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404';
       const res = await axios.get(baseUrl, { params: buildQueryParams(item) });
       const data = res.data;
 
@@ -75,6 +76,7 @@ function buildQueryParams(item: KeywordSet): URLSearchParams {
   params.append('format', 'json');
   params.append('sort', '-releaseDate');
   params.append('applicationId', APP_ID);
+  params.append('accessKey', ACCESS_KEY);
   params.append('outOfStockFlag', '1');
   params.append('hits', '5');
   params.append('size', item.size.toString());
