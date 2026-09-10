@@ -81,17 +81,15 @@ const {
 </script>
 
 <template>
-  <div class="px-[15px]">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-medium">保留リスト</h2>
-    </div>
-    <template v-if="useWishlist.books && useWishlist.books.length > 0">
-      <BookList :books="useWishlist.books" @modal-opened="openDetail" />
-    </template>
-    <template v-else>
-      <EmptyState msg="保留にしている書籍はありません" />
-    </template>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-medium">保留リスト</h2>
   </div>
+  <template v-if="useWishlist.books && useWishlist.books.length > 0">
+    <BookList :books="useWishlist.books" @modal-opened="openDetail" />
+  </template>
+  <template v-else>
+    <EmptyState msg="保留にしている書籍はありません" />
+  </template>
 
   <!-- モーダル -->
   <DetaileModal :is-show="isShow" :book="detailTargetBook" @modal-closed="closeDetail">

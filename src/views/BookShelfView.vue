@@ -64,18 +64,16 @@ const {
 </script>
 
 <template>
-  <div class="px-[15px]">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-medium">本棚リスト</h2>
-    </div>
-
-    <template v-if="useBookShelf.books && useBookShelf.books.length > 0">
-      <BookList :books="useBookShelf.books" :is-BookShelf="true"  @modal-opened="openDetail" />
-    </template>
-    <template v-else>
-      <EmptyState msg="購入した書籍はありません" />
-    </template>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-medium">本棚リスト</h2>
   </div>
+
+  <template v-if="useBookShelf.books && useBookShelf.books.length > 0">
+    <BookList :books="useBookShelf.books" :is-BookShelf="true"  @modal-opened="openDetail" />
+  </template>
+  <template v-else>
+    <EmptyState msg="購入した書籍はありません" />
+  </template>
 
   <!-- モーダル -->
   <DetaileModal :is-show="isShow" :book="detailTargetBook" @modal-closed="closeDetail">

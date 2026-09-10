@@ -115,19 +115,17 @@ const {
 </script>
 
 <template>
-  <div class="px-[15px]">
-    <div class="flex justify-between items-center mb-6 sm:relative">
-      <h2 class="text-xl font-medium">新刊情報</h2>
+  <div class="flex justify-between items-center mb-6 sm:relative">
+    <h2 class="text-xl font-medium">新刊情報</h2>
 
-      <div class="flex justify-center items-center fixed sm:absolute top-[54px] sm:top-[50%] right-[15px] sm:transform sm:-translate-y-1/2 z-10 text-[#a16a00]">
-        <button @click="viewType = 'index'" :aria-pressed="viewType === 'index'" :class="[baseStyle, 'rounded-l', viewType === 'index'? activeStyle : hoverStyle]" aria-label="一覧"><ListCheck :size="26" /></button>
-        <button @click="viewType = 'calendar'" :aria-pressed="viewType === 'calendar'" :class="[baseStyle, 'rounded-r', viewType === 'calendar'? activeStyle : hoverStyle]" aria-label="カレンダー"><CalendarCheck :size="26" /></button>
-      </div>
+    <div class="flex justify-center items-center fixed sm:absolute top-[54px] sm:top-[50%] right-[15px] sm:right-0 sm:transform sm:-translate-y-1/2 z-10 text-[#a16a00]">
+      <button @click="viewType = 'index'" :aria-pressed="viewType === 'index'" :class="[baseStyle, 'rounded-l', viewType === 'index'? activeStyle : hoverStyle]" aria-label="一覧"><ListCheck :size="26" /></button>
+      <button @click="viewType = 'calendar'" :aria-pressed="viewType === 'calendar'" :class="[baseStyle, 'rounded-r', viewType === 'calendar'? activeStyle : hoverStyle]" aria-label="カレンダー"><CalendarCheck :size="26" /></button>
     </div>
   </div>
 
   <template v-if="booksForDisplay && booksForDisplay.length > 0">
-    <div v-if="viewType === 'index'" class="px-[15px]">
+    <div v-if="viewType === 'index'">
       <BookList :is-home="true" :books="booksForDisplay" @modal-opened="openDetail" />
     </div>
     <template v-if="viewType === 'calendar'">

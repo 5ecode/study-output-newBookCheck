@@ -4,7 +4,7 @@
 body {
   background: #fffaef;
   color: #261100;
-  font-family: Noto Sans JP,"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+  font-family: Noto Sans JP, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 }
 
 input:focus-visible {
@@ -13,8 +13,6 @@ input:focus-visible {
 
 a:focus-visible,
 input:focus-visible,
-button:focus-visible{
+button:focus-visible {
   outline-color: #ff907a;
 }
-
-
