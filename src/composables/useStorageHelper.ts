@@ -1,5 +1,8 @@
 
 // src/composables/useStorageHelper.ts
+
+/* ローカルストレージの読み書き
+-------------------------------------------- */
 export function useStorageHelper<T>(storageKey: string, list: { value: T }) {
   // ローカルストレージに保存したデータを読み込む
   function loadFromStorage() {

@@ -2,6 +2,8 @@
 import { ref, nextTick } from 'vue';
 import type { BookWithId } from '../types/common';
 
+/* モーダルの状態管理
+-------------------------------------------- */
 export function useModal() {
   const isShow = ref(false);
   const detailTargetBook = ref<BookWithId | null>(null);
