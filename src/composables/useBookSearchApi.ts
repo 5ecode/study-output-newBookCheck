@@ -2,8 +2,8 @@
 import axios from 'axios';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
-import { formatDate } from '../utils/formatDate';
 import { parseLocalDate } from '../utils/parseLocalDate';
+import { getDaysAgo } from '../utils/getDaysAgo';
 import type { KeywordSet, BookData } from '../types/common';
 
 interface RakutenApiItem {
@@ -16,7 +16,8 @@ interface RakutenApiItem {
   size: string
 }
 
-// 新刊情報を取得
+/* 新刊情報を取得
+-------------------------------------------- */
 export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful = false) {
   const useNewBooks = useNewBooksStore();
 
@@ -26,7 +27,9 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
       const res = await axios.get(baseUrl, { params: buildQueryParams(item) });
       const data = res.data;
 
-      const newBooks: BookData[] = data.Items.map((item: { Item: RakutenApiItem }) => ({
+      if (!data) return;
+
+      const parsedData: BookData[] = data.Items.map((item: { Item: RakutenApiItem }) => ({
         title: item.Item.title,
         author: item.Item.author,
         imageUrl: item.Item.largeImageUrl,
@@ -36,25 +39,19 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
         size: mapSize(item.Item.size),
       }));
 
-      // キーワードが含まれた書籍かを確認
-      const checkBooks = newBooks.filter(book => {
-        const titleMatch = item.title ? book.title?.includes(item.title) : false;
-        const authorMatch = item.author ? book.author?.includes(item.author) : false;
-
-        return ( (titleMatch || authorMatch));
-      });
-
-      // 補足データを追加
-      const enrichedResults: BookData[] = [];
-      for (const book of checkBooks) {
-        const enriched = addRegularDate(book);
-        if (enriched) {
-          enrichedResults.push(enriched);
+      // 新刊定義の書籍のみ取り出す
+      const newBooksData: BookData[] = [];
+      for (const book of parsedData) {
+        const isNewBook = hasBookToAdd(book);
+        if (isNewBook) {
+          newBooksData.push(isNewBook);
         }
       }
 
-      useNewBooks.addNewBooks(enrichedResults);
+      // 新刊情報をストアに追加
+      useNewBooks.addNewBooks(newBooksData);
 
+      // 状態付き書籍情報に新刊情報をマージ
       if (updateStateful) {
         updateStatefulBooks(true);
       }
@@ -84,27 +81,29 @@ function buildQueryParams(item: KeywordSet): URLSearchParams {
 
 // 書籍サイズ変換
 function mapSize(sizeStr: string): 0 | 1 | 2 | 3 | 9 {
-  switch (sizeStr) {
-  case '単行本': return 1;
-  case '文庫': return 2;
-  case 'コミック': return 9;
-  case '新書': return 3;
-  default: return 0;
-  }
+  const map: Record<string, 0 | 1 | 2 | 3 | 9> = {
+    '単行本': 1,
+    '文庫': 2,
+    'コミック': 9,
+    '新書': 3,
+  };
+
+  return map[sizeStr] ?? 0;
 }
 
 // 新刊定義の書籍のみ追加
-function addRegularDate(book: BookData) {
-  if (book.salesDate) {
-    const data = formatSalesDate(book.salesDate);
-    const bookDate = parseLocalDate(data);
-    const threeMonthsAgo = parseLocalDate(formatDate(new Date()));
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+function hasBookToAdd(book: BookData) {
+  if (!book.salesDate) return null;
+  const data = formatSalesDate(book.salesDate);
+  const bookDate = parseLocalDate(data);
+  // 3か月（90日）前の日付を計算
+  const ninetyDaysAgo = getDaysAgo(90);
 
-    if (bookDate >= threeMonthsAgo) {
-      return { ...book,  date: data };
-    }
+  // 発売日が現在の3か月前から見て未来なら追加する
+  if (bookDate >= ninetyDaysAgo) {
+    return { ...book,  date: data };
   }
+  return null;
 }
 
 // 発売日形式変換

@@ -8,6 +8,7 @@ import type { BookData, BookWithId } from '../types/common';
 export const useNewBooksStore = defineStore('new', () => {
   const storageKey = 'new-books';
   const books = ref<BookWithId[]>([]);
+  const hasNewBookUpdate = ref(false);
   const {
     loadFromStorage,
     saveToStorage,
@@ -21,6 +22,7 @@ export const useNewBooksStore = defineStore('new', () => {
 
   // 書籍を追加
   function addNewBooks(newBooks: BookData[]) {
+    let isAdded = false;
     for (const book of newBooks) {
       if (!isAlreadyAdded(book, books.value)) {
         books.value.push({
@@ -35,11 +37,20 @@ export const useNewBooksStore = defineStore('new', () => {
           state: null,
           size: book.size,
         });
-        saveToStorage();
+
+        isAdded = true;
       }
     }
+
+    // 追加後にローカルストレージに保存
+    if (isAdded) {
+      saveToStorage();
+      hasNewBookUpdate.value = true;
+    }
+
+    // 新刊情報をローカルストレージから読み込む
     loadFromStorage();
   }
 
-  return { books, loadFromStorage, saveToStorage, addNewBooks };
+  return { books, loadFromStorage, saveToStorage, addNewBooks, hasNewBookUpdate };
 });

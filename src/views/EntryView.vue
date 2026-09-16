@@ -4,8 +4,8 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue';
 import { useEntryStore } from '../stores/EntryStore';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { useBookSearchApi } from '../composables/useBookSearchApi';
-import DeleteButton from '../components/DeleteButton.vue';
 import type { KeywordSet } from '../types/common';
+import DeleteButton from '../components/DeleteButton.vue';
 
 /* constant
 ---------------------------------- */
@@ -50,6 +50,7 @@ watch(showMsg, (newVal) => {
 
 /* computed
 ---------------------------------- */
+// 次のIDを計算する
 const nextId = computed((): number => {
   if (useEntry.keywordList.length === 0) return 1;
   return Math.max(...useEntry.keywordList.map(value => value.id)) + 1;
@@ -73,15 +74,27 @@ function keywordRegister() {
   }
   errors.entry = '';
 
-  const keyword = {
+  // 新しいキーワードセットを作成
+  const keyword: KeywordSet = {
     id: nextId.value,
     title: title.value ?? null,
     author: author.value ?? null,
     size: size.value,
   };
+
+  // キーワード重複チェック
+  const isDuplicate = isDuplicateKeyword(keyword, useEntry.keywordList);
+  if (isDuplicate) {
+    errors.entry = '同じキーワードが既に登録されています';
+    return;
+  }
+  errors.entry = '';
+
+  // キーワードセットをストアに追加
   useEntry.keywordList.push(keyword);
   useEntry.saveToStorage();
 
+  // 新しいキーワードで新刊情報を検索
   newBookSearch([keyword]);
 
   title.value = '';
@@ -106,10 +119,7 @@ function deleteKeywordSet(targetId: number) {
 }
 
 // キーワード編集
-function editKeywordSet(targetItem: { id: number,
-  title: string | null,
-  author: string | null,
-  size: number}) {
+function editKeywordSet(targetItem: KeywordSet) {
   editingId.value = targetItem.id;
   editSize.value = targetItem.size;
   editTitle.value = targetItem.title ?? '';
@@ -123,7 +133,7 @@ function editKeywordSet(targetItem: { id: number,
   });
 }
 
-// 編集保存
+// 編集を保存
 function saveKeywordSet(targetId: number) {
   if (!editTitle.value && !editAuthor.value) {
     errors.edit = '書籍名、著者名どちらかを入力してください';
@@ -131,7 +141,9 @@ function saveKeywordSet(targetId: number) {
   }
   errors.edit = '';
 
+  // 変更前のキーワードを取得
   const index = useEntry.keywordList.findIndex(item => item.id === targetId);
+  // 変更前と変更後のキーワードが同じ場合は何もしない
   const originalKeyword = useEntry.keywordList[index];
   if (
     originalKeyword.title === editTitle.value &&
@@ -142,21 +154,32 @@ function saveKeywordSet(targetId: number) {
     return;
   };
 
+  // 変更後のキーワードを作成
+  const editKeyword: KeywordSet = {
+    id: targetId,
+    title: editTitle.value ?? null,
+    author: editAuthor.value ?? null,
+    size: editSize.value,
+  };
+
+  const keywordList = useEntry.keywordList.filter(item => item.id !== targetId);
+  const isDuplicate = isDuplicateKeyword(editKeyword, keywordList);
+  if (isDuplicate) {
+    errors.edit = '同じキーワードが既に登録されています';
+    return;
+  }
+  errors.edit = '';
+
   // 変更前のキーワードで新刊情報から書籍を削除
   removedFromNewBooks(originalKeyword);
 
   // 変更を保存
   useEntry.keywordList[index] = {
     ...useEntry.keywordList[index],
-    ...{
-      id: targetId,
-      size: editSize.value,
-      title: editTitle.value,
-      author: editAuthor.value,
-    },
+    ...editKeyword,
   };
-
   useEntry.saveToStorage();
+
   editingId.value = null;
   showMsg.value = true;
 
@@ -176,13 +199,25 @@ function cancel() {
 function removedFromNewBooks(keyword: KeywordSet) {
   useNewBooks.books = useNewBooks.books.filter(book => {
     const titleMatch = keyword.title ? book.title?.includes(keyword.title) : false;
-    const authorMatch = keyword.author ? book.author?.includes(keyword.author) : false;
+    const authorMatch = keyword.author ? book.author.replace(/[\s ]+/g, '')?.includes(keyword.author.replace(/[\s ]+/g, '')) : false;
     const sizeMatch = (book.size === keyword.size || keyword.size === 0);
 
     return !((titleMatch || authorMatch) && sizeMatch);
   });
 
   useNewBooks.saveToStorage();
+  useNewBooks.hasNewBookUpdate = true;
+}
+
+// キーワード重複チェック
+function isDuplicateKeyword(keyword: KeywordSet, keywords: KeywordSet[]) {
+  return keywords.some(item => {
+    const isSameTitle = keyword.title !== null && keyword.title !== '' && keyword.title === item.title;
+    const isSameAuthor = keyword.author !== null && keyword.author !== '' && keyword.author === item.author;
+    const isSameSize = keyword.size === item.size || keyword.size === 0 || item.size === 0;
+    // タイトルまたは著者が同じで、サイズが同じかどちらかが0の場合は重複
+    return (isSameTitle || isSameAuthor) && isSameSize;
+  });
 }
 
 // 新刊チェック
@@ -206,10 +241,10 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
 
     <div class="flex flex-col gap-2" v-bind:class="[errors.entry? 'mb-4':'mb-6']">
       <label>
-        書籍名:<input v-model="title" type="text" placeholder="書籍名を入力" class="border rounded p-1 w-full" />
+        書籍名:<input @input="errors.entry = ''" v-model="title" type="text" placeholder="書籍名を入力" class="border rounded p-1 w-full" />
       </label>
       <label>
-        著者名:<input v-model="author" type="text" placeholder="著者名を入力" class="border rounded p-1 w-full" />
+        著者名:<input @input="errors.entry = ''" v-model="author" type="text" placeholder="著者名を入力" class="border rounded p-1 w-full" />
       </label>
     </div>
 
@@ -236,10 +271,10 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
               </template>
             </div>
             <p><label>
-              書籍名: <input v-model="editTitle" type="text" class="border rounded p-1 w-full" />
+              書籍名: <input @input="errors.entry = ''" v-model="editTitle" type="text" class="border rounded p-1 w-full" />
             </label></p>
             <p><label>
-              著者名: <input v-model="editAuthor" type="text" class="border rounded p-1 w-full" />
+              著者名: <input @input="errors.entry = ''" v-model="editAuthor" type="text" class="border rounded p-1 w-full" />
             </label></p>
             <p v-if="errors.edit" class="text-red-500 text-sm">{{ errors.edit }}</p>
           </div>

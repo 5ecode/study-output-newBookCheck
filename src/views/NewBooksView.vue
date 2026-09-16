@@ -14,6 +14,7 @@ import { formatDate } from '../utils/formatDate';
 import { isAfterToday } from '../utils/isAfterToday';
 import { isAlreadyAdded } from '../utils/isAlreadyAdded';
 import { parseLocalDate } from '../utils/parseLocalDate';
+import { getDaysAgo } from '../utils/getDaysAgo';
 import BookList from '../components/BookList.vue';
 import Calendar from '../components/Calendar.vue';
 import DetaileModal from '../components/DetaileModal.vue';
@@ -57,25 +58,33 @@ onMounted(() => {
 
 /* function
 ---------------------------------- */
-// 日に一度だけ最新情報取得
+// 最新情報取得
 async function updateNewBooks() {
   const today = formatDate(new Date());
   const lastFetchDate = localStorage.getItem(storageKey);
 
+  // 日に一回、最新情報を取得
   if (lastFetchDate !== today) {
-    // 新刊定義から外れた書籍を削除
-    const threeMonthsAgo = parseLocalDate(formatDate(new Date()));
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    useNewBooks.books = useNewBooks.books.filter(book => parseLocalDate(book.date) >= threeMonthsAgo);
+    // 3か月（90日）前の日付を計算
+    const ninetyDaysAgo = getDaysAgo(90);
+
+    // 新刊定義から外れた書籍を削除して保存
+    useNewBooks.books = useNewBooks.books.filter(book => parseLocalDate(book.date) >= ninetyDaysAgo);
     useNewBooks.saveToStorage();
 
-    // 最新の新刊情報取得
+    // 登録中のキーワードで新刊の最新情報を取得後に状態付き書籍情報を更新
     await useBookSearchApi(useEntry.keywordList, true);
 
     // 最新更新日を記録
     localStorage.setItem(storageKey, today);
-  } else {
+  }
+
+  // キーワードが追加・編集されている場合
+  if (useNewBooks.hasNewBookUpdate) {
+    // 状態付き書籍情報を更新
     updateStatefulBooks(false);
+    // 更新フラグリセット
+    useNewBooks.hasNewBookUpdate = false;
   }
 }
 
@@ -83,6 +92,7 @@ async function updateNewBooks() {
 function changeState(book: BookWithId, state: State) {
   if (book.state === state) return;
 
+  // 状態を変更して保存
   book.state = state;
   useStatefull.saveToStorage();
 
@@ -140,7 +150,7 @@ const {
   <DetaileModal :is-show="isShow" :book="detailTargetBook" @modal-closed="closeDetail">
     <StateButton v-if="isAfterToday(detailTargetBook!.date)" :is-active="detailTargetBook?.state === 'ordered'" @clicked="changeState(detailTargetBook!, 'ordered')">予約済</StateButton>
 
-    <StateButton :is-active="detailTargetBook?.state === 'bought'" @clicked="changeState(detailTargetBook!, 'bought')">購入済</StateButton>
+    <StateButton v-if="!isAfterToday(detailTargetBook!.date)" :is-active="detailTargetBook?.state === 'bought'" @clicked="changeState(detailTargetBook!, 'bought')">購入済</StateButton>
 
     <StateButton :is-active="detailTargetBook?.state === 'pending'" @clicked="changeState(detailTargetBook!, 'pending')">保留中</StateButton>
 
