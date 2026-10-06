@@ -23,19 +23,25 @@ export const useNewBooksStore = defineStore('new', () => {
   // 書籍を追加
   function addNewBooks(newBooks: BookData[]) {
     let isAdded = false;
-    for (const book of newBooks) {
-      if (!isAlreadyAdded(book, books.value)) {
+    for (const newBook of newBooks) {
+      if (!isAlreadyAdded(newBook, books.value)) {
+        // 同じisbnがある場合は、一度書籍を削除
+        if (newBook.isbn) {
+          books.value = books.value.filter(book => book.isbn !== newBook.isbn);
+        }
+
+        // 新しい書籍を追加
         books.value.push({
           id: nextId.value,
-          title: book.title,
-          author: book.author,
-          salesDate: book.salesDate,
-          itemUrl: book.itemUrl,
-          imageUrl: book.imageUrl,
-          date: book.date,
-          isbn: book.isbn,
+          title: newBook.title,
+          author: newBook.author,
+          salesDate: newBook.salesDate,
+          itemUrl: newBook.itemUrl,
+          imageUrl: newBook.imageUrl,
+          date: newBook.date,
+          isbn: newBook.isbn,
           state: null,
-          size: book.size,
+          size: newBook.size,
         });
 
         isAdded = true;
