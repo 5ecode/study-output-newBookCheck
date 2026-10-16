@@ -1,7 +1,7 @@
 // src/composables/useBookSearchApi.ts
 import axios from 'axios';
 import { useNewBooksStore } from '../stores/NewBooksStore';
-import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
+import { useUpdateStatefulBooks } from '../composables/useUpdateStatefulBooks';
 import { parseLocalDate } from '../utils/parseLocalDate';
 import { getDaysAgo } from '../utils/getDaysAgo';
 import type { KeywordSet, BookData } from '../types/common';
@@ -51,9 +51,9 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
       // 新刊情報をストアに追加
       useNewBooks.addNewBooks(newBooksData);
 
-      // 状態付き書籍情報に新刊情報をマージ
       if (updateStateful) {
-        updateStatefulBooks(true);
+        // 状態付き書籍情報を更新
+        useUpdateStatefulBooks(true);
       }
 
       // 1秒に1回リクエスト

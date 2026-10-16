@@ -1,3 +1,4 @@
+// src/composables/useUpdateStatefulBooks.ts
 import { useBookShelfStore } from '../stores/BookShelfStore';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { useStatefullBooksStore } from '../stores/StatefulBooksStore';
@@ -8,7 +9,7 @@ import type { BookWithId } from '../types/common';
 
 /* 状態付き書籍情報の更新
 -------------------------------------------- */
-export function updateStatefulBooks(updateStateful: boolean) {
+export function useUpdateStatefulBooks(updateStateful: boolean) {
   const useNewBooks = useNewBooksStore();
   const useStatefull = useStatefullBooksStore();
   const useBookShelf = useBookShelfStore();

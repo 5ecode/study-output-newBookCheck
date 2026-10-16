@@ -9,7 +9,7 @@ import { useWishlistStore } from '../stores/WishlistStore';
 import { ListCheck, CalendarCheck } from 'lucide-vue-next';
 import { useBookSearchApi } from '../composables/useBookSearchApi';
 import { useModal } from '../composables/useModal';
-import { updateStatefulBooks } from '../composables/useUpdateStatefulBooks';
+import { useUpdateStatefulBooks } from '../composables/useUpdateStatefulBooks';
 import { formatDate } from '../utils/formatDate';
 import { isAfterToday } from '../utils/isAfterToday';
 import { isAlreadyAdded } from '../utils/isAlreadyAdded';
@@ -82,7 +82,7 @@ async function updateNewBooks() {
   // キーワードが追加・編集されている場合
   if (useNewBooks.hasNewBookUpdate) {
     // 状態付き書籍情報を更新
-    updateStatefulBooks(false);
+    useUpdateStatefulBooks(false);
     // 更新フラグリセット
     useNewBooks.hasNewBookUpdate = false;
   }
@@ -96,8 +96,15 @@ function changeState(book: BookWithId, state: State) {
   book.state = state;
   useStatefull.saveToStorage();
 
-  // 本棚に保存
+  // 保留中に保存
+  if (state === 'pending' && !isAlreadyAdded(book, useWishlist.books)) {
+    useWishlist.books.push({ ...book });
+    useWishlist.saveToStorage();
+  }
+
+  // 購入済みに変更した場合
   if (state === 'bought' && !isAlreadyAdded(book, useBookShelf.books)) {
+    // 本棚に追加
     useBookShelf.books.push({ ...book });
     useBookShelf.saveToStorage();
 
@@ -106,9 +113,10 @@ function changeState(book: BookWithId, state: State) {
     useWishlist.saveToStorage();
   }
 
-  // 保留中に保存
-  if (state === 'pending' && !isAlreadyAdded(book, useWishlist.books)) {
-    useWishlist.books.push({ ...book });
+  // 予約済みにした場合
+  if (state === 'ordered') {
+    // 保留中からは削除
+    useWishlist.books = useWishlist.books.filter(b => b.isbn !== book.isbn);
     useWishlist.saveToStorage();
   }
 
