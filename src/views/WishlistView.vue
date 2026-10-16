@@ -1,4 +1,4 @@
-<!-- src/views/BookShelfView.vue -->
+<!-- src/views/WishlistView.vue -->
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useStatefullBooksStore } from '../stores/StatefulBooksStore';
