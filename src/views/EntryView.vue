@@ -259,7 +259,7 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-medium ">キーワードリスト</h2>
     </div>
-    <ul class="flex flex-col gap-2">
+    <ul class="flex flex-col gap-2 mb-6">
       <li v-for="item in useEntry.keywordList" v-bind:key="item.id" class="grid sm:grid-cols-[auto_100px] gap-5 sm:gap-3 border border-slate-500 p-3">
 
         <template v-if="editingId === item.id">
@@ -301,6 +301,12 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
     </ul>
   </template>
 
+  <div class="block text-center text-sm">
+    <!-- Rakuten Web Services Attribution Snippet FROM HERE -->
+    <a href="https://developers.rakuten.com/" target="_blank">Supported by Rakuten Developers</a>
+    <!-- Rakuten Web Services Attribution Snippet TO HERE -->
+  </div>
+
   <transition name="fade" appear>
     <div v-if="showMsg" @:click="showMsg = !showMsg" class="fixed inset-x-0 bottom-[50%] sm:bottom-0 w-full bg-[#008b8b]/70 text-white text-center">変更を保存しました<span class="fixed right-0 bottom-[50%] sm:bottom-[1px]"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></span></div>
@@ -308,6 +314,12 @@ async function newBookSearch(keywordSet: KeywordSet[]) {
 </template>
 
 <style scoped>
+a {
+  color: #a16a00;
+}
+a:hover{
+  text-decoration: underline;
+}
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s ease;
 }
