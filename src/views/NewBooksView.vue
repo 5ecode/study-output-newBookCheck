@@ -96,31 +96,44 @@ function changeState(book: BookWithId, state: State) {
   book.state = state;
   useStatefull.saveToStorage();
 
-  // 保留中に保存
+  // 保留中に変更した場合
   if (state === 'pending' && !isAlreadyAdded(book, useWishlist.books)) {
+    // 保留中リストに追加して発売日順にソート
     useWishlist.books.push({ ...book });
+    useWishlist.books = sortByReleaseDate(useWishlist.books);
     useWishlist.saveToStorage();
   }
 
   // 購入済みに変更した場合
   if (state === 'bought' && !isAlreadyAdded(book, useBookShelf.books)) {
-    // 本棚に追加
+    // 本棚に追加して発売日順にソート
     useBookShelf.books.push({ ...book });
+    useBookShelf.books = sortByReleaseDate(useBookShelf.books);
+
     useBookShelf.saveToStorage();
 
     // 保留中からは削除
-    useWishlist.books = useWishlist.books.filter(b => b.isbn !== book.isbn);
-    useWishlist.saveToStorage();
+    updateWishlist(book);
   }
 
   // 予約済みにした場合
   if (state === 'ordered') {
     // 保留中からは削除
-    useWishlist.books = useWishlist.books.filter(b => b.isbn !== book.isbn);
-    useWishlist.saveToStorage();
+    updateWishlist(book);
   }
 
   closeDetail();
+}
+
+// 発売日順にソート
+function sortByReleaseDate(books: BookWithId[]) {
+  return books.sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
+}
+
+// 保留中リストから削除
+function updateWishlist(book: BookWithId) {
+  useWishlist.books = useWishlist.books.filter(b => b.isbn !== book.isbn);
+  useWishlist.saveToStorage();
 }
 
 // モーダルロジック

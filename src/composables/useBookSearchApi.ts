@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { useNewBooksStore } from '../stores/NewBooksStore';
 import { useUpdateStatefulBooks } from '../composables/useUpdateStatefulBooks';
+import { useUpdateWishlist } from '../composables/useUpdateWishlist';
 import { parseLocalDate } from '../utils/parseLocalDate';
 import { getDaysAgo } from '../utils/getDaysAgo';
 import type { KeywordSet, BookData } from '../types/common';
@@ -54,6 +55,8 @@ export async function useBookSearchApi(keywordSet: KeywordSet[],updateStateful =
       if (updateStateful) {
         // 状態付き書籍情報を更新
         useUpdateStatefulBooks(true);
+        // 保留中の書籍データを更新
+        useUpdateWishlist();
       }
 
       // 1秒に1回リクエスト
