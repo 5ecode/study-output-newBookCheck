@@ -5,6 +5,7 @@ import { useStatefullBooksStore } from '../stores/StatefulBooksStore';
 import { formatDate } from '../utils/formatDate';
 import { parseLocalDate } from '../utils/parseLocalDate';
 import { getDaysAgo } from '../utils/getDaysAgo';
+import { sortByReleaseDate } from '../utils/sortByReleaseDate';
 import type { BookWithId } from '../types/common';
 
 /* 状態付き書籍情報の更新
@@ -27,6 +28,7 @@ export function useUpdateStatefulBooks(updateStateful: boolean) {
 
   // 更新が必要な場合
   if (updateStateful) {
+    let bookShelfUpdate = false;
     const today = parseLocalDate(formatDate(new Date()));
     const filtered: BookWithId[] = [];
 
@@ -39,9 +41,11 @@ export function useUpdateStatefulBooks(updateStateful: boolean) {
       if (book.state === 'ordered' && parseLocalDate(book.date) <= today) {
         book.state = 'bought';
 
-        // 本棚に追加
+        // 本棚に追加されていなければ追加して発売日順にソート
         if (!useBookShelf.books.some(b => b.isbn === book.isbn)) {
           useBookShelf.books.push({ ...book });
+          useBookShelf.books = sortByReleaseDate(useBookShelf.books);
+          bookShelfUpdate = true;
         }
       }
 
@@ -51,8 +55,10 @@ export function useUpdateStatefulBooks(updateStateful: boolean) {
       }
     }
 
-    // 本棚更新
-    useBookShelf.saveToStorage();
+    // 本棚が更新されたら保存
+    if (bookShelfUpdate) {
+      useBookShelf.saveToStorage();
+    }
 
     // 発売日順にソート
     const sortedDates = filtered.sort((a, b) => {

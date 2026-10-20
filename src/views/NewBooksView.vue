@@ -15,6 +15,7 @@ import { isAfterToday } from '../utils/isAfterToday';
 import { isAlreadyAdded } from '../utils/isAlreadyAdded';
 import { parseLocalDate } from '../utils/parseLocalDate';
 import { getDaysAgo } from '../utils/getDaysAgo';
+import { sortByReleaseDate } from '../utils/sortByReleaseDate';
 import BookList from '../components/BookList.vue';
 import Calendar from '../components/Calendar.vue';
 import DetaileModal from '../components/DetaileModal.vue';
@@ -123,11 +124,6 @@ function changeState(book: BookWithId, state: State) {
   }
 
   closeDetail();
-}
-
-// 発売日順にソート
-function sortByReleaseDate(books: BookWithId[]) {
-  return books.sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
 }
 
 // 保留中リストから削除
