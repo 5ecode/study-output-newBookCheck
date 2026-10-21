@@ -123,6 +123,12 @@ function changeState(book: BookWithId, state: State) {
     updateWishlist(book);
   }
 
+  // リセットした場合
+  if (state === null) {
+    updateWishlist(book);
+    return;
+  }
+
   closeDetail();
 }
 
