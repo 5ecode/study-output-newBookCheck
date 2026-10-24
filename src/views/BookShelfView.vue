@@ -39,9 +39,9 @@ function deleteBook(id: number) {
   updateStatefulBooks(id);
 }
 
-// 書籍の状態を更新
+// 状態付き書籍情報を更新
 function updateStatefulBooks(id: number) {
-  useStatefull.books = useStatefull.books.filter(function (book) {
+  useStatefull.books = useStatefull.books.filter((book) => {
     if (book.id === id) {
       book.state = null;
       return { ...book };
@@ -50,7 +50,6 @@ function updateStatefulBooks(id: number) {
     }
   });
   useStatefull.saveToStorage();
-
   closeDetail();
 }
 
